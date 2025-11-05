@@ -1,0 +1,9 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URL:https://eureka-qa.internal/eureka}
+logging:
+  level:
+    root: INFO
+cors:
+  allowed-origins: "https://app-qa.midominio.com"

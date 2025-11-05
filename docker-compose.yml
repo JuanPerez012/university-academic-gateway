@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  gateway:
+    image: registry.example.com/university-gateway:${IMAGE_TAG:-develop}
+    container_name: gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      APPLICATION_NAME: ${APPLICATION_NAME:-GatewayService}
+      EUREKA_HOSTNAME: ${EUREKA_HOSTNAME:-localhost}
+      EUREKA_DEFAULTZONE: ${EUREKA_DEFAULTZONE:-http://localhost:8761/eureka/}
+      JAVA_OPTS: ${JAVA_OPTS:-}
+    command: >
+      sh -c "java $${JAVA_OPTS}
+      -jar /app/app.jar
+      --spring.profiles.active=$${SPRING_PROFILES_ACTIVE}"
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gateway-net
+
+networks:
+  gateway-net:
+    driver: bridge

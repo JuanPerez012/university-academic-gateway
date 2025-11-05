@@ -1,0 +1,11 @@
+services:
+  gateway:
+    image: university-gateway:qa
+    environment:
+      SPRING_PROFILES_ACTIVE: qa
+      SERVER_PORT: 8080
+      APPLICATION_NAME: GatewayService-QA
+      EUREKA_HOSTNAME: eureka-qa
+      EUREKA_DEFAULTZONE: https://eureka-qa.internal/eureka/
+    ports:
+      - "8081:8080"
