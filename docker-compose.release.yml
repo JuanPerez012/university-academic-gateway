@@ -1,0 +1,11 @@
+services:
+  gateway:
+    image: university-gateway:release
+    environment:
+      SPRING_PROFILES_ACTIVE: release
+      SERVER_PORT: 8080
+      APPLICATION_NAME: GatewayService-REL
+      EUREKA_HOSTNAME: eureka-release
+      EUREKA_DEFAULTZONE: https://eureka-rel.internal/eureka/
+    ports:
+      - "8082:8080"

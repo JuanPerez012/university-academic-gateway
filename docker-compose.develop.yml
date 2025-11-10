@@ -1,0 +1,11 @@
+services:
+  gateway:
+    image: university-gateway:develop
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8080
+      APPLICATION_NAME: GatewayService-DEV
+      EUREKA_HOSTNAME: eureka-dev
+      EUREKA_DEFAULTZONE: http://host.docker.internal:8761/eureka/
+    ports:
+      - "8080:8080"

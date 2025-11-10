@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    gateway:
+      routes: []
+      default-filters:
+        - RemoveRequestHeader=Cookie
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URL:http://eureka-dev:8761/eureka}
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG
+cors:
+  allowed-origins: "http://localhost:3000"

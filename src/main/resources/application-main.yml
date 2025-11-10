@@ -1,0 +1,3 @@
+eureka.client.serviceUrl.defaultZone: ${EUREKA_URL:https://eureka.midominio.com/eureka}
+logging.level.root: WARN
+cors.allowed-origins: "https://app.midominio.com"
