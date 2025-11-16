@@ -1,2 +1,0 @@
-eureka.client.serviceUrl.defaultZone: ${EUREKA_URL:https://eureka-rel.internal/eureka}
-cors.allowed-origins: "https://app-rel.midominio.com"
