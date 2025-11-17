@@ -80,8 +80,8 @@ pipeline {
                      sh """
                          cd ${DEPLOY_DIR}
                          export IMAGE_TAG=${IMAGE_TAG}
-                         docker-compose down || true
-                         docker-compose up -d
+                         docker compose down || true
+                         docker compose up -d
                      """
                  }
              }
