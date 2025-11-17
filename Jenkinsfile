@@ -8,6 +8,7 @@ pipeline {
             description: 'Ambiente a usar (solo informativo)'
         )
         string(name: 'BRANCH', defaultValue: 'develop', description: 'Rama a construir')
+        string(name: 'IMAGE_TAG', defaultValue: '', description: 'Tag de la imagen Docker')
         string(name: 'DOCKER_REGISTRY_HOST', defaultValue: '', description: 'Registry para push (vacío = no push)')
     }
 
@@ -74,18 +75,26 @@ pipeline {
             }
         }
 
-         stage('Deploy with Compose') {
-             steps {
-                 script {
-                     sh """
-                         cd ${DEPLOY_DIR}
-                         export IMAGE_TAG=${IMAGE_TAG}
-                         docker compose down || true
-                         docker compose up -d
-                     """
-                 }
-             }
-         }
+        stage('Update Deploy Env') {
+            steps {
+                sh """
+                    # Actualiza IMAGE_TAG en el .env.deploy para que docker-compose use la última imagen
+                    sed -i '/^IMAGE_TAG=/d' ${DEPLOY_DIR}/${ENV_DEPLOY_FILE}
+                    echo "IMAGE_TAG=${IMAGE_TAG}" >> ${DEPLOY_DIR}/${ENV_DEPLOY_FILE}
+                    echo "IMAGE_TAG actualizado en ${ENV_DEPLOY_FILE} con la última imagen: ${IMAGE_TAG}"
+                """
+            }
+        }
+
+        stage('Deploy with Compose') {
+            steps {
+                sh """
+                    cd ${DEPLOY_DIR}
+                    docker-compose down || true
+                    docker-compose up -d
+                """
+            }
+        }
     }
 
     post {
