@@ -75,17 +75,18 @@ pipeline {
         }
 
         stage('Deploy with Compose') {
-            steps {
-                script {
-                    sh """
-                        cd ${DEPLOY_DIR}
-                        export IMAGE_TAG=${IMAGE_TAG}
-                        docker compose down || true
-                        docker compose up -d
-                    """
-                }
-            }
-        }
+         stage('Deploy with Compose') {
+             steps {
+                 script {
+                     sh """
+                         cd ${DEPLOY_DIR}
+                         export IMAGE_TAG=${IMAGE_TAG}
+                         docker-compose down || true
+                         docker-compose up -d
+                     """
+                 }
+             }
+         }
     }
 
     post {
