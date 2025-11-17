@@ -15,7 +15,7 @@ pipeline {
     environment {
         MVN_CMD = "/usr/bin/mvn"
         IMAGE_NAME = "gateway-service"
-        IMAGE_TAG = "${ENVIRONMENT}-${BUILD_NUMBER}" // Tag dinámico
+        IMAGE_TAG = "${ENVIRONMENT}-${BUILD_NUMBER}"
         FULL_IMAGE = "${DOCKER_REGISTRY_HOST ? DOCKER_REGISTRY_HOST + '/' : ''}${IMAGE_NAME}:${IMAGE_TAG}"
         ENV_DEPLOY_FILE = ".env.deploy"
         DOCKER_REGISTRY_CRED = "docker-registry-creds"
@@ -23,7 +23,9 @@ pipeline {
         CONTAINER_NAME = "gateway-service"
     }
 
-    options { timestamps() }
+    options {
+        timestamps()
+    }
 
     stages {
         stage('Checkout') {
@@ -45,7 +47,9 @@ pipeline {
         }
 
         stage('Maven Package') {
-            tools { maven 'Maven3.9' }
+            tools {
+                maven 'Maven3.9'
+            }
             steps {
                 sh "mvn clean package -DskipTests -DskipITs"
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
@@ -59,7 +63,9 @@ pipeline {
         }
 
         stage('Docker Push') {
-            when { expression { return DOCKER_REGISTRY_HOST?.trim() } }
+            when {
+                expression { return DOCKER_REGISTRY_HOST?.trim() }
+            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: DOCKER_REGISTRY_CRED,
@@ -75,31 +81,30 @@ pipeline {
             }
         }
 
-        stage('Update Deploy Env') {
+        stage('Deploy') {
             steps {
-                sh """
-                    # Actualiza IMAGE_TAG en el .env.deploy para que docker-compose use la última imagen
-                    sed -i '/^IMAGE_TAG=/d' ${DEPLOY_DIR}/${ENV_DEPLOY_FILE}
-                    echo "IMAGE_TAG=${IMAGE_TAG}" >> ${DEPLOY_DIR}/${ENV_DEPLOY_FILE}
-                    echo "IMAGE_TAG actualizado en ${ENV_DEPLOY_FILE} con la última imagen: ${IMAGE_TAG}"
-                """
-            }
-        }
+                script {
+                    def port = sh(script: "grep '^PORT=' ${DEPLOY_DIR}/${ENV_DEPLOY_FILE} | cut -d '=' -f2", returnStdout: true).trim()
 
-        stage('Deploy with Compose') {
-            steps {
-                sh """
-                    cd ${DEPLOY_DIR}
-                    docker-compose down || true
-                    docker-compose up -d
-                """
+                    sh """
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+                        docker run -d --name ${CONTAINER_NAME} --env-file ${DEPLOY_DIR}/${ENV_DEPLOY_FILE} -p ${port}:${port} ${FULL_IMAGE}
+                    """
+                }
             }
         }
     }
 
     post {
-        success { echo "Pipeline completo. Imagen generada: ${FULL_IMAGE}" }
-        failure { echo "Pipeline falló." }
-        always { cleanWs() }
+        success {
+            echo "Pipeline completo. Imagen generada: ${FULL_IMAGE}"
+        }
+        failure {
+            echo "Pipeline falló."
+        }
+        always {
+            cleanWs()
+        }
     }
 }
