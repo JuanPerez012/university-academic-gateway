@@ -74,7 +74,6 @@ pipeline {
             }
         }
 
-        stage('Deploy with Compose') {
          stage('Deploy with Compose') {
              steps {
                  script {
